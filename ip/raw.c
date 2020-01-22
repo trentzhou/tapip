@@ -7,10 +7,16 @@
 static void raw_recv(struct pkbuf *pkb, struct sock *sk)
 {
 	/* FIFO queue */
+	pthread_mutex_lock(&sk->recv_wait->mutex);
+	int was_empty = 0;
+	if (list_empty(&sk->recv_queue))
+		was_empty = 1;
 	list_add_tail(&pkb->pk_list, &sk->recv_queue);
 	/* Should we get sk? */
 	pkb->pk_sk = sk;
-	sk->ops->recv_notify(sk);
+	if (was_empty)
+		pthread_cond_broadcast(&sk->recv_wait->cond);
+	pthread_mutex_unlock(&sk->recv_wait->mutex);
 }
 
 void raw_in(struct pkbuf *pkb)

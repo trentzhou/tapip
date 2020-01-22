@@ -5,7 +5,7 @@
 #include "ether.h"
 #include "lib.h"
 
-#define MAX_PKBS 200
+#define MAX_PKBS 200000
 int free_pkbs = 0;
 int alloc_pkbs = 0;
 

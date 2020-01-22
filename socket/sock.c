@@ -54,16 +54,20 @@ struct pkbuf *sock_recv_pkb(struct sock *sk)
 {
 	struct pkbuf *pkb = NULL;
 
-	while (1) {
-		if (!list_empty(&sk->recv_queue)) {
-			pkb = list_first_entry(&sk->recv_queue, struct pkbuf, pk_list);
-			list_del_init(&pkb->pk_list);
-			break;
-		}
-		/* FIXME: sock state handling */
-		if (sleep_on(sk->recv_wait) < 0)
+	pthread_mutex_lock(&sk->recv_wait->mutex);
+	while (list_empty(&sk->recv_queue)) {
+		sk->recv_wait->sleep = 1;
+		if (pthread_cond_wait(&sk->recv_wait->cond, &sk->recv_wait->mutex) != 0 || sk->recv_wait->dead)
 			break;
 	}
+	sk->recv_wait->sleep = 0;
+	
+	if (!list_empty(&sk->recv_queue)) {
+		pkb = list_first_entry(&sk->recv_queue, struct pkbuf, pk_list);
+		list_del_init(&pkb->pk_list);
+	}
+	pthread_mutex_unlock(&sk->recv_wait->mutex);
+	
 	return pkb;
 }
 

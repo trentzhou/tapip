@@ -21,8 +21,9 @@ MAKEFLAGS += --no-print-directory
 LD = ld
 CC = gcc
 CFLAGS = -Wall -I../include
-LFLAGS = -pthread
+LFLAGS = -pthread 
 export LD CC CFLAGS
+CFLAGS += -g
 
 ifeq ($(CONFIG_DEBUG), y)
 	CFLAGS += -g
@@ -67,7 +68,7 @@ NET_STACK_OBJS =	shell/shell_obj.o	\
 all:tapip
 tapip:$(NET_STACK_OBJS)
 	@echo " [BUILD] $@"
-	$(Q)$(CC) $(LFLAGS) $^ -o $@
+	$(Q)$(CC) $(LFLAGS) $^ -o $@ -lreadline
 
 shell/shell_obj.o:shell/*.c
 	@make -C shell/

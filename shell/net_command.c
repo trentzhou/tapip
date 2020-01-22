@@ -143,11 +143,6 @@ void ifconfig(int argc, char **argv)
 	list_for_each_entry(dev, &net_devices, net_list) {
 		ifinfo(dev);
 	}
-#ifndef CONFIG_TOP1
-	/* tap0 */
-	printf("\n--- NOTE: this nic isnt in tapip, it is in remote machine ---\n");
-	ifinfo(&tap->dev);
-#endif
 }
 
 void stat(int argc, char **argv)

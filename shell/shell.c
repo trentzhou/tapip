@@ -3,6 +3,8 @@
  */
 #include "lib.h"
 #include "arp.h"
+#include <readline/readline.h>
+#include <readline/history.h>
 
 static void signal_init(void);
 /* extern builtin command handlers */
@@ -17,6 +19,7 @@ extern void ifconfig(int, char **);
 extern void stat(int, char **);
 extern void route(int, char **);
 extern void ping(int, char **);
+extern void perf(int, char **);
 extern void ping2(int, char **);
 extern void snc(int, char **);
 extern void attach_dev(int, char **);
@@ -74,6 +77,7 @@ static struct command cmds[] = {
 	/* new thread command */
 	{ 1, CMD_NONUM, ping, "ping", "ping [OPTIONS] ipaddr" },
 	{ 1, CMD_NONUM, snc, "snc", "Simplex Net Cat" },
+	{ 1, CMD_NONUM, perf, "perf", "Performance test" },
 	{0, CMD_NONUM, attach_dev, "attach_dev", "attach_dev [devname] [ip] [mask]"},
 	/* last one */
 	{ 0, 0, NULL, NULL, NULL }	/* can also use sizeof(cmds)/sizeof(cmds[0]) for cmds number */
@@ -104,30 +108,19 @@ static void builtin_exit(int argc, char **argv)
 
 static int get_line(char *buf, int bufsz)
 {
-	char *p;
-	int len;
-	p = fgets(buf, bufsz - 1, stdin);
-	if (!p) {
-		/*
-		 * Ctrl+D also cause interrupt.
-		 * Because int signal is set RESTART, so other interrupts
-		 * will not return from fgets.
-		 */
-		if (errno && errno != EINTR)
-			perrx("fgets");
-		/* EOF (Ctrl + D) is set as exit command */
-		printf("exit\n");
-		strcpy(buf, "exit");
-		p = buf;
+	char* line = readline("cmd: ");
+	if (line == NULL)
+	{
+		sprintf(buf, "exit");
 	}
-	len = strlen(p);
-	if (len == 0)
-		return 0;
-	if (p[len - 1] == '\n') {
-		p[len - 1] = '\0';
-		len--;
+	else
+	{
+		if (*line)
+			add_history(line);
+		strncpy(buf, line, bufsz-1);
+		buf[bufsz-1] = 0;
 	}
-	return len;
+	return strlen(buf);
 }
 
 static char *get_arg(char **pp)
@@ -257,7 +250,6 @@ void shell_master(char *prompt_str)
 		prompt = prompt_str;
 	signal_init();
 	while (!master_quit) {
-		print_prompt();
 		linelen = get_line(linebuf, 256);
 		argc = parse_line(linebuf, linelen, argv);
 		if (argc > 0)

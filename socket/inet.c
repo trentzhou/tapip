@@ -55,6 +55,7 @@ static int inet_socket(struct socket *sock, int protocol)
 	/* only used by raw ip */
 	if (sk->hash && sk->ops->hash)
 		sk->ops->hash(sk);
+	sk->recv_wait = &sock->sleep;
 	return 0;
 }
 
@@ -178,9 +179,7 @@ static int inet_read(struct socket *sock, void *buf, int len)
 	struct sock *sk = sock->sk;
 	int ret = -1;
 	if (sk) {
-		sk->recv_wait = &sock->sleep;
 		ret = sk->ops->recv_buf(sock->sk, buf, len);
-		sk->recv_wait = NULL;
 	}
 	return ret;
 }
@@ -208,9 +207,7 @@ static struct pkbuf *inet_recv(struct socket *sock)
 	struct sock *sk = sock->sk;
 	struct pkbuf *pkb = NULL;
 	if (sk) {
-		sk->recv_wait = &sock->sleep;
 		pkb = sk->ops->recv(sock->sk);
-		sk->recv_wait = NULL;
 	}
 	return pkb;
 }

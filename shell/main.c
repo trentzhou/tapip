@@ -45,8 +45,8 @@ void net_stack_run(void)
 	threads[1] = newthread((pfunc_t)tcp_timer);
 	dbg("thread 1: tcp_timer");
 	/* create netdev thread */
-	threads[2] = newthread((pfunc_t)netdev_interrupt);
-	dbg("thread 2: netdev_interrupt");
+	//threads[2] = newthread((pfunc_t)netdev_interrupt);
+	//dbg("thread 2: netdev_interrupt");
 	/* shell worker thread */
 	threads[3] = newthread((pfunc_t)shell_worker);
 	dbg("thread 3: shell worker");
@@ -60,8 +60,8 @@ void net_stack_exit(void)
 		perror("kill child 0");
 	if (pthread_cancel(threads[1]))
 		perror("kill child 1");
-	if (pthread_cancel(threads[2]))
-		perror("kill child 2");
+	//if (pthread_cancel(threads[2]))
+	//	perror("kill child 2");
 	/* shell work will be killed by shell master */
 	if (pthread_join(threads[3], NULL))
 		perror("kill child 3");

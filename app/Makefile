@@ -1,4 +1,4 @@
-OBJS	= ping.o snc.o
+OBJS	= ping.o snc.o perf.o
 SUBDIR	= app
 
 all:app_obj.o

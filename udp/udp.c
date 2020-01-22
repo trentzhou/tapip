@@ -15,8 +15,15 @@ static void udp_recv(struct pkbuf *pkb, struct ip *iphdr, struct udp *udphdr)
 		goto drop;
 	}
 	/* FIFO receive queue */
+	pthread_mutex_lock(&sk->recv_wait->mutex);
+	int notify = 0;
+	if (list_empty(&sk->recv_queue))
+		notify = 1;
 	list_add_tail(&pkb->pk_list, &sk->recv_queue);
-	sk->ops->recv_notify(sk);
+	//sk->ops->recv_notify(sk);
+	if (notify)
+		pthread_cond_broadcast(&sk->recv_wait->cond);
+	pthread_mutex_unlock(&sk->recv_wait->mutex);
 	/* We have handled the input packet with sock, so release it */
 	free_sock(sk);
 	return;
