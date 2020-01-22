@@ -37,6 +37,7 @@ struct netdev {
 	struct netdev_ops *net_ops;		/* Nic Operation */
 	struct netstats net_stats;		/* protocol independent statistic */
 	struct list_head net_list;		/* net device list */
+	void* priv;
 };
 #define LOCALNET(dev) ((dev)->net_ipaddr & (dev)->net_mask)
 
@@ -91,7 +92,7 @@ extern struct netdev *veth;
 extern struct netdev *loop;
 
 extern void netdev_init(void);
-extern struct netdev *netdev_alloc(char *dev, struct netdev_ops *);
+extern struct netdev *netdev_alloc(char *dev, struct netdev_ops *, void* priv);
 extern void netdev_free(struct netdev *nd);
 extern void netdev_interrupt(void);
 extern void netdev_exit(void);

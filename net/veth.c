@@ -134,7 +134,7 @@ void veth_poll(void)
 
 void veth_init(void)
 {
-	veth = netdev_alloc("veth", &veth_ops);
+	veth = netdev_alloc("veth", &veth_ops, 0);
 }
 
 void veth_exit(void)

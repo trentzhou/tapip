@@ -18,7 +18,7 @@ extern void veth_exit(void);
 extern void veth_poll(void);
 
 /* Alloc localhost net devices */
-struct netdev *netdev_alloc(char *devstr, struct netdev_ops *netops)
+struct netdev *netdev_alloc(char *devstr, struct netdev_ops *netops, void* priv)
 {
 	struct netdev *dev;
 	dev = xzalloc(sizeof(*dev));
@@ -28,6 +28,7 @@ struct netdev *netdev_alloc(char *devstr, struct netdev_ops *netops)
 	dev->net_name[NETDEV_NLEN - 1] = '\0';
 	strncpy((char *)dev->net_name, devstr, NETDEV_NLEN - 1);
 	dev->net_ops = netops;
+	dev->priv = priv;
 	if (netops && netops->init)
 		netops->init(dev);
 	return dev;

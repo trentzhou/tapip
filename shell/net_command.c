@@ -99,6 +99,24 @@ void route(int argc, char **argv)
 	rt_traverse();
 }
 
+extern struct netdev* physical_eth_init(const char* device, const char* ipstr, int maskbits);
+void attach_dev(int argc, char** argv)
+{
+	if (argc != 4)
+	{
+		printf("Usage: attach_dev [devname] [ip] [mask]");
+		return;
+	}
+	char* devname = argv[1];
+	char* ip = argv[2];
+	char* netmask = argv[3];
+	// init the device
+	struct netdev* peth = physical_eth_init(devname, ip, atoi(netmask));
+	// add route table
+	rt_add(peth->net_ipaddr, 0xffffffff, 0, 0, RT_LOCALHOST, loop);
+	rt_add(LOCALNET(peth), peth->net_mask, 0, 0, RT_NONE, peth);
+}
+
 void ifinfo(struct netdev *dev)
 {
 	printf("%-10sHWaddr "MACFMT"\n"
@@ -118,12 +136,13 @@ void ifinfo(struct netdev *dev)
 		dev->net_stats.tx_errors);
 }
 
+extern struct list_head net_devices;
 void ifconfig(int argc, char **argv)
 {
-	/* lo */
-	ifinfo(loop);
-	/* veth */
-	ifinfo(veth);
+	struct netdev *dev;
+	list_for_each_entry(dev, &net_devices, net_list) {
+		ifinfo(dev);
+	}
 #ifndef CONFIG_TOP1
 	/* tap0 */
 	printf("\n--- NOTE: this nic isnt in tapip, it is in remote machine ---\n");

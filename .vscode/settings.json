@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "lib.h": "c",
+        "netif.h": "c",
+        "if.h": "c",
+        "types.h": "c"
+    }
+}

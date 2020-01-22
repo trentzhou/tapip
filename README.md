@@ -4,6 +4,13 @@
 ===========                                            -- 2015/10/28
 ```
 
+This project is a fork of [Xiaochen Wang's tapip project](https://github.com/chobits/tapip).
+
+My hackings include:
+
+* I added a command `attach_dev` in the interactive shell, you can use this `tapip` program to control a real ethernet port.
+
+
 tapip
 =====
 A user-mode TCP/IP stack based on linux tap device

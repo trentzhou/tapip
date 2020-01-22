@@ -1,4 +1,4 @@
-OBJS	= net.o netdev.o veth.o loop.o pkb.o tap.o
+OBJS	= net.o netdev.o veth.o loop.o pkb.o tap.o physical_eth.o
 SUBDIR	= net
 
 all:net_obj.o

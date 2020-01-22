@@ -45,7 +45,7 @@ static struct netdev_ops loop_ops = {
 
 void loop_init(void)
 {
-	loop = netdev_alloc("lo", &loop_ops);
+	loop = netdev_alloc("lo", &loop_ops, 0);
 }
 
 void loop_exit(void)

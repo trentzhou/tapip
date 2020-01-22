@@ -65,7 +65,7 @@ void arp_recv(struct netdev *dev, struct pkbuf *pkb)
 	}
 
 	if (ahdr->arp_tip != dev->net_ipaddr) {
-		arpdbg("not for us");
+		arpdbg("not for us. I am %s: " IPFMT, dev->net_name, ipfmt(dev->net_ipaddr));
 		goto free_pkb;
 	}
 
