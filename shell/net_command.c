@@ -117,13 +117,34 @@ void attach_dev(int argc, char** argv)
 	rt_add(LOCALNET(peth), peth->net_mask, 0, 0, RT_NONE, peth);
 }
 
+
+struct netdev* shmeth_dev_create(const char* devname, const char* side, char* ipstr, int maskbits);
+
+void attach_shmeth_dev(int argc, char** argv)
+{
+	if (argc != 5)
+	{
+		printf("Usage: attach_dev [devname] [side] [ip] [mask]");
+		return;
+	}
+	char* devname = argv[1];
+	char* side = argv[2];
+	char* ip = argv[3];
+	char* netmask = argv[4];
+	// init the device
+	struct netdev* dev = shmeth_dev_create(devname, side, ip, atoi(netmask));
+	// add route table
+	rt_add(dev->net_ipaddr, 0xffffffff, 0, 0, RT_LOCALHOST, loop);
+	rt_add(LOCALNET(dev), dev->net_mask, 0, 0, RT_NONE, dev);
+}
+
 void ifinfo(struct netdev *dev)
 {
 	printf("%-10sHWaddr "MACFMT"\n"
 		"          IPaddr "IPFMT"\n"
 		"          mtu %d\n"
-		"          RX packet:%u bytes:%u errors:%u\n"
-		"          TX packet:%u bytes:%u errors:%u\n",
+		"          RX packet:%lu bytes:%lu errors:%lu\n"
+		"          TX packet:%lu bytes:%lu errors:%lu\n",
 		dev->net_name,
 		macfmt(dev->net_hwaddr),
 		ipfmt(dev->net_ipaddr),

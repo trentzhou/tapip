@@ -5,6 +5,7 @@
 #include "icmp.h"
 #include "ip.h"
 #include "udp.h"
+#include "socket.h"
 
 static void udp_recv(struct pkbuf *pkb, struct ip *iphdr, struct udp *udphdr)
 {
@@ -14,6 +15,14 @@ static void udp_recv(struct pkbuf *pkb, struct ip *iphdr, struct udp *udphdr)
 		icmp_send(ICMP_T_DESTUNREACH, ICMP_PORT_UNREACH, 0, pkb);
 		goto drop;
 	}
+	// check if the socket has a customized callback defined
+	struct socket* sock = sk->sock;
+	if (sock != 0 && sock->rx_cb != 0) {
+		sock->rx_cb(sock->priv, pkb);
+		free_pkb(pkb);
+		return;
+	}
+	
 	/* FIFO receive queue */
 	pthread_mutex_lock(&sk->recv_wait->mutex);
 	int notify = 0;

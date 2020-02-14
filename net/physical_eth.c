@@ -101,9 +101,10 @@ void physical_eth_dev_exit(struct netdev* d)
 }
 
 extern void* physical_eth_poll(void* x);
-static struct netdev* peth;
+
 struct netdev* physical_eth_init(const char* device, char* ipstr, int maskbits)
 {
+    struct netdev* peth;
     static struct netdev_ops peth_ops = {
         .init = physical_eth_dev_init,
         .xmit = physical_eth_dev_xmit,
@@ -120,58 +121,40 @@ struct netdev* physical_eth_init(const char* device, char* ipstr, int maskbits)
     peth = netdev_alloc("peth", &peth_ops, priv);
     // just start the rx thread now
     pthread_t tid;
-    pthread_create(&tid, 0, physical_eth_poll, 0);
+    pthread_create(&tid, 0, physical_eth_poll, peth);
     return peth;
 }
 
-void physical_eth_exit(void)
+static int physical_eth_recv(struct netdev* dev, struct pkbuf *pkb)
 {
-    netdev_free(peth);
-}
-
-static int physical_eth_recv(struct pkbuf *pkb)
-{
-    struct physical_eth_dev* priv = (struct physical_eth_dev*)peth->priv;
+    struct physical_eth_dev* priv = (struct physical_eth_dev*)dev->priv;
 	int l;
 	l = read(priv->fd, pkb->pk_data, pkb->pk_len);
 	if (l <= 0) {
 		devdbg("read net dev");
-		peth->net_stats.rx_errors++;
+		dev->net_stats.rx_errors++;
 	} else {
 		devdbg("read net dev size: %d\n", l);
-		peth->net_stats.rx_packets++;
-		peth->net_stats.rx_bytes += l;
+		dev->net_stats.rx_packets++;
+		dev->net_stats.rx_bytes += l;
 		pkb->pk_len = l;
 	}
 	return l;
 }
 
-static void physical_eth_rx(void)
-{
-	struct pkbuf *pkb = alloc_netdev_pkb(peth);
-	if (physical_eth_recv(pkb) > 0)
-		net_in(peth, pkb);	/* pass to upper */
-	else
-		free_pkb(pkb);
-}
-
 
 void* physical_eth_poll(void* x)
 {
-	struct pollfd pfd = {};
-    struct physical_eth_dev* priv = (struct physical_eth_dev*)peth->priv;
-	int ret;
-    x = x;
+    struct netdev* dev = x;
+	
 	while (1) {
-		pfd.fd = priv->fd;
-		pfd.events = POLLIN;
-		pfd.revents = 0;
-		/* one event, infinite time */
-		ret = poll(&pfd, 1, -1);
-		if (ret <= 0)
-			perrx("poll /dev/net/tun");
 		/* get a packet and handle it */
-		physical_eth_rx();
+            
+        struct pkbuf *pkb = alloc_netdev_pkb(dev);
+        if (physical_eth_recv(dev, pkb) > 0)
+            net_in(dev, pkb);	/* pass to upper */
+        else
+            free_pkb(pkb);
 	}
     return 0;
 }

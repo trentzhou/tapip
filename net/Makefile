@@ -1,4 +1,6 @@
-OBJS	= net.o netdev.o veth.o loop.o pkb.o tap.o physical_eth.o
+C_FILES = $(wildcard *.c)
+OBJS = $(subst .c,.o,$(C_FILES))
+#OBJS	= net.o netdev.o veth.o loop.o pkb.o tap.o physical_eth.o
 SUBDIR	= net
 
 all:net_obj.o

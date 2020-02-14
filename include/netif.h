@@ -12,12 +12,12 @@ struct pkbuf;
 struct netdev;
 
 struct netstats {
-	unsigned int rx_packets;
-	unsigned int tx_packets;
-	unsigned int rx_errors;
-	unsigned int tx_errors;
-	unsigned int rx_bytes;
-	unsigned int tx_bytes;
+	unsigned long rx_packets;
+	unsigned long tx_packets;
+	unsigned long rx_errors;
+	unsigned long tx_errors;
+	unsigned long rx_bytes;
+	unsigned long tx_bytes;
 };
 
 struct netdev_ops {

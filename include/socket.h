@@ -39,6 +39,8 @@ struct socket_ops {
 	struct pkbuf *(*recv)(struct socket *);
 };
 
+typedef void (*sock_rx_callback_t)(void* priv, struct pkbuf* pkt);
+
 struct socket {
 	unsigned int state;
 	unsigned int family;	/* socket family: always AF_INET */
@@ -47,7 +49,12 @@ struct socket {
 	struct socket_ops *ops;
 	struct sock *sk;
 	int refcnt;		/* refer to linux file::f_count */
+
+	void* priv;
+	sock_rx_callback_t rx_cb;
 };
+
+extern void _sock_set_rx_callback(struct socket* , sock_rx_callback_t cb, void* priv);
 
 extern struct socket *_socket(int, int, int);
 extern int _listen(struct socket *, int);

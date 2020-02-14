@@ -3,6 +3,7 @@
         "lib.h": "c",
         "netif.h": "c",
         "if.h": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "shm_eth.h": "c"
     }
 }

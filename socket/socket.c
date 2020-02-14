@@ -205,6 +205,15 @@ out:
 	return ret;
 }
 
+void _sock_set_rx_callback(struct socket* sock, sock_rx_callback_t cb, void* priv)
+{
+	if (!sock)
+		return;
+	sock->priv = priv;
+	sock->rx_cb = cb;
+}
+
+
 void socket_init(void)
 {
 	inet_init();

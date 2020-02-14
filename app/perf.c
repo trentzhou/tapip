@@ -5,6 +5,7 @@
 #include "route.h"
 #include "socket.h"
 #include "sock.h"
+#include "../net/stat.h"
 #include <sys/time.h>
 
 #define F_BIND		1
@@ -25,9 +26,6 @@ static struct socket *csock;
 static struct sock_addr skaddr;
 static unsigned int packet_length = BUF_SIZE;
 volatile static int interrupt;
-// statistics
-static unsigned long packet_count = 0;
-static unsigned long total_bytes = 0;
 
 static void close_socket(void)
 {
@@ -98,67 +96,26 @@ static void send_packet(void)
 	}
 }
 
-static unsigned long timestamp_us()
+static void on_rx_packet(void* x, struct pkbuf* pkb)
 {
-    struct timeval tv;
-    gettimeofday(&tv,NULL);
-    unsigned long time_in_micros = 1000000 * tv.tv_sec + tv.tv_usec;
-    return time_in_micros;
+	uint64_t * count = x;
+	++*count;
 }
 
 static void recv_udp_packet(void)
 {
-	struct pkbuf *pkb;
-	struct ip *iphdr;
-	struct udp *udphdr;
-	int len;
-    unsigned long print_tick = 0;
+	uint64_t pktcount = 0;
+	struct stat_reporter_t stat;
+	stat_init(&stat);
 
-    packet_count = 0;
-    total_bytes = 0;
-
-    unsigned long last_packet_count;
-    unsigned long last_bytes;
-
-	while (1) {
-		/* recv from socket */
-		pkb = _recv(sock);
-		if (!pkb) {
-			printf("recv no pkb\n");
-			break;
-		}
-		iphdr = pkb2ip(pkb);
-		udphdr = ip2udp(iphdr);
-		debug("%lu: ip: %d bytes from " IPFMT ":%d\n", 
-                        packet_count,
-                        ipdlen(iphdr),
-						ipfmt(iphdr->ip_src),
-						_ntohs(udphdr->src));
-		/* output stdin */
-		len = _ntohs(udphdr->length) - UDP_HRD_SZ;
-		// statistics
-        packet_count++;
-        total_bytes += len;
-        // print stat every 1 million packets
-        if (packet_count % 1000000 == 0)
-        {
-            unsigned long now = timestamp_us();
-            if (print_tick != 0)
-            {
-                printf("%lu packets in %lu microseconds. %lu packets (%lu bytes) per second\n", 
-                    packet_count - last_packet_count,
-                    now - print_tick,
-                    (packet_count - last_packet_count) * 1000000 / (now - print_tick),
-                    (total_bytes - last_bytes) * 1000000 / (now - print_tick)
-                );
-            }
-            print_tick = now;
-            last_packet_count = packet_count;
-            last_bytes = total_bytes;
-        }
-
-		free_pkb(pkb);
+	// set the callback
+	_sock_set_rx_callback(sock, on_rx_packet, &pktcount);
+	while (!interrupt)
+	{
+		sleep(1);
+		stat_show(&stat, pktcount, true);
 	}
+
 }
 
 static void recv_packet(void)
