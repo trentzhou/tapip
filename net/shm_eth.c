@@ -79,6 +79,8 @@ SHMETH_T* shmeth_open(const char* name, SHMETH_SIDE_T side)
     shmeth->shm_addr = shm_addr;
     shmeth->shm_id = shm_id;
 
+    pthread_mutex_init(&shmeth->mutex, 0);
+
     return shmeth;
 }
 
@@ -87,6 +89,7 @@ void shmeth_close(SHMETH_T* shmeth)
     shmdt(shmeth->shm_addr);
     // mark the memory to be deleted
     shmctl(shmeth->shm_id, IPC_RMID, NULL);
+    pthread_mutex_destroy(&shmeth->mutex);
     free(shmeth);
 }
 
@@ -108,7 +111,10 @@ void shmeth_get_mac(SHMETH_T* shmeth, SHMETH_SIDE_T side, uint8_t* buf)
 bool shmeth_write_packet(SHMETH_T* shmeth, void* data, uint32_t len)
 {
     CB_T* cb = shmeth->side == SHMETH_SIDE_A? shmeth->cb_atob: shmeth->cb_btoa;
-    return cb_put_packet(cb, data, len);
+    pthread_mutex_lock(&shmeth->mutex);
+    bool result = cb_put_packet(cb, data, len);
+    pthread_mutex_unlock(&shmeth->mutex);
+    return result;
 }
 
 bool shmeth_read_packet(SHMETH_T* shmeth, void* buf, uint32_t buflen, uint32_t* pktlen)

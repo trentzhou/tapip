@@ -3,6 +3,7 @@
 
 // A simulated ethernet interface using shared memory
 #include "fast_pipe.h"
+#include "pthread.h"
 
 enum shmeth_side_t
 {
@@ -18,6 +19,7 @@ struct shmeth_t
     CB_T* cb_atob;
     CB_T* cb_btoa;
     int shm_id;
+    pthread_mutex_t mutex;
     void* shm_addr;
 };
 
