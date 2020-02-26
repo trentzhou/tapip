@@ -109,6 +109,7 @@ extern void *xmalloc(int);
 extern void *xzalloc(int);
 extern void perrx(char *str);
 extern int str2ip(char *str, unsigned int *ip);
+extern int parse_ip_mask(const char* str, unsigned int* ip, unsigned int* mask);
 extern void printfs(int mlen, const char *fmt, ...);
 extern int parse_ip_port(char *, unsigned int *, unsigned short *);
 

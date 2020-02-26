@@ -18,6 +18,7 @@ struct rtentry {
 #define RT_DEFAULT	0x00000002
 
 extern struct rtentry *rt_lookup(unsigned int);
+extern void rt_delete(unsigned int ip, unsigned int mask);
 extern void rt_add(unsigned int, unsigned int, unsigned int,
 			int, unsigned int, struct netdev *);
 extern void rt_init(void);

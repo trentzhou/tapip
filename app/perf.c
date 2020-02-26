@@ -136,6 +136,7 @@ static int parse_args(int argc, char **argv)
 	/* reinitialize getopt() */
 	optind = 0;
 	opterr = 0;
+	packet_length = 10;
 	while ((c = getopt(argc, argv, "b:c:l:du?h")) != -1) {
 		switch (c) {
 		case 'd':

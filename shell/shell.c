@@ -72,7 +72,7 @@ static struct command cmds[] = {
 	{ 0, CMD_NONUM, netdebug, "debug", "debug dev|l2|arp|ip|icmp|udp|tcp|all" },
 	{ 0, CMD_NONUM, ping2, "ping2", "ping [OPTIONS] ipaddr(Internal stack implementation)" },
 	{ 0, 1, arpcache, "arpcache", "see arp cache" },
-	{ 0, 1, route, "route", "show / manipulate the IP routing table" },
+	{ 0, CMD_NONUM, route, "route", "show / manipulate the IP routing table" },
 	{ 0, 1, ifconfig, "ifconfig", "configure a network interface" },
 	{ 0, 1, stat, "stat", "display pkb/sock information" },
 	/* new thread command */

@@ -96,7 +96,29 @@ void arpcache(int argc, char **argv)
 
 void route(int argc, char **argv)
 {
-	rt_traverse();
+	if (argc == 1)
+	{
+		rt_traverse();
+	}
+	else if ((argc == 4) && !strcmp(argv[1], "add"))
+	{
+		// add a route
+		char* target = argv[2];
+		char* gateway = argv[3];
+		unsigned ip, mask, gw;
+		parse_ip_mask(target, &ip, &mask);
+		str2ip(gateway, &gw);
+		struct rtentry* e = rt_lookup(gw);
+		if (e != 0)
+			rt_add(ip, mask, gw, 10, RT_NONE, e->rt_dev);
+	}
+	else if ((argc == 3) && !strcmp(argv[1], "delete"))
+	{
+		char* target = argv[2];
+		unsigned ip, mask;
+		parse_ip_mask(target, &ip, &mask);
+		rt_delete(ip, mask);
+	}
 }
 
 extern struct netdev* physical_eth_init(const char* device, const char* ipstr, int maskbits);

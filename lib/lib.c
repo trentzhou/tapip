@@ -52,6 +52,18 @@ int str2ip(char *str, unsigned int *ip)
 	return 0;
 }
 
+int parse_ip_mask(const char* str, unsigned int* ip, unsigned int* mask)
+{
+	unsigned int a, b, c, d, m;
+	if (sscanf(str, "%u.%u.%u.%u/%u", &a, &b, &c, &d, &m) != 5)
+		return -1;
+	if (a > 255 || b > 255 || c > 255 || d > 255 || m > 32)
+		return -1;
+	*ip = a | (b << 8) | (c << 16) | (d << 24);
+	*mask = _htonl(~((1 << (32-m)) - 1));
+	return 0;
+}
+
 int parse_ip_port(char *str, unsigned int *addr, unsigned short *nport)
 {
 	char *port;

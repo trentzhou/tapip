@@ -21,6 +21,19 @@ struct rtentry *rt_lookup(unsigned int ipaddr)
 	return NULL;
 }
 
+void rt_delete(unsigned int ip, unsigned int mask)
+{
+	struct rtentry *rt;
+	/* FIXME: lock found route entry, which may be deleted */
+	list_for_each_entry(rt, &rt_head, rt_list) {
+		if ((rt->rt_netmask == mask) && (rt->rt_net == ip))
+		{
+			list_del(&rt->rt_list);
+			return;
+		}
+	}
+}
+
 struct rtentry *rt_alloc(unsigned int net, unsigned int netmask,
 	unsigned int gw, int metric, unsigned int flags, struct netdev *dev)
 {
