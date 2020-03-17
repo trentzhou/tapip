@@ -23,7 +23,6 @@ real_all: tapip
 CFLAGS=
 
 ifeq ($(CONFIG_DPDK), 1)
-	CFLAGS += -DCONFIG_DPDK
 	NET_STACK_OBJS += net/lib_dpdk.o
 
 ifeq ($(RTE_SDK),)
@@ -35,6 +34,7 @@ endif
 	include $(RTE_SDK)/mk/rte.vars.mk
 	include $(RTE_SDK)/mk/rte.app.mk
 	LFLAGS += $(call linkerprefix, $(LDLIBS))
+	CFLAGS += -DCONFIG_DPDK
 endif
 MAKEFLAGS += --no-print-directory
 

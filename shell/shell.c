@@ -24,6 +24,7 @@ extern void ping2(int, char **);
 extern void snc(int, char **);
 extern void attach_dev(int, char **);
 extern void attach_shmeth_dev(int, char **);
+extern void attach_dpdk(int, char **);
 
 struct command {
 	int cmd_new;	/* new thread flag */
@@ -80,7 +81,10 @@ static struct command cmds[] = {
 	{ 1, CMD_NONUM, snc, "snc", "Simplex Net Cat" },
 	{ 1, CMD_NONUM, perf, "perf", "Performance test" },
 	{0, CMD_NONUM, attach_dev, "attach_dev", "attach_dev [devname] [ip] [mask]"},
-	{0, CMD_NONUM, attach_shmeth_dev, "attach_shmeth_dev", "attach_dev [devname] [side] [ip] [mask]"},
+	{0, CMD_NONUM, attach_shmeth_dev, "attach_shmeth_dev", "attach_shmeth_dev [devname] [side] [ip] [mask]"},
+#ifdef CONFIG_DPDK
+	{0, CMD_NONUM, attach_dpdk, "attach_dpdk", "attach_dpdk [cpumask] [ip] [mask]"},
+#endif
 	/* last one */
 	{ 0, 0, NULL, NULL, NULL }	/* can also use sizeof(cmds)/sizeof(cmds[0]) for cmds number */
 };

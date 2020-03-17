@@ -457,7 +457,7 @@ static int dpdk_rx_thread(void* x)
     return 0;
 }
 
-struct netdev* dpdk_dev_create(const char* devname, char* coremask, char* ipstr, int maskbits)
+struct netdev* dpdk_dev_create(char* coremask, char* ipstr, int maskbits)
 {
     struct netdev* dev;
     static struct netdev_ops dpdk_ops = {

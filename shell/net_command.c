@@ -160,6 +160,27 @@ void attach_shmeth_dev(int argc, char** argv)
 	rt_add(LOCALNET(dev), dev->net_mask, 0, 0, RT_NONE, dev);
 }
 
+#ifdef CONFIG_DPDK
+struct netdev* dpdk_dev_create(char* coremask, char* ipstr, int maskbits);
+
+void attach_dpdk(int argc, char** argv)
+{
+	if (argc != 4)
+	{
+		printf("Usage: attach_dpdk [coremask] [ip] [mask]");
+		return;
+	}
+	char* coremask = argv[1];
+	char* ip = argv[2];
+	char* netmask = argv[3];
+	// init the device
+	struct netdev* dev = dpdk_dev_create(coremask, ip, atoi(netmask));
+	// add route table
+	rt_add(dev->net_ipaddr, 0xffffffff, 0, 0, RT_LOCALHOST, loop);
+	rt_add(LOCALNET(dev), dev->net_mask, 0, 0, RT_NONE, dev);
+}
+#endif
+
 void ifinfo(struct netdev *dev)
 {
 	printf("%-10sHWaddr "MACFMT"\n"
