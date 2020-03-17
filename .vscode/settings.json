@@ -4,6 +4,8 @@
         "netif.h": "c",
         "if.h": "c",
         "types.h": "c",
-        "shm_eth.h": "c"
+        "shm_eth.h": "c",
+        "rte_mempool.h": "c",
+        "rte_version.h": "c"
     }
 }

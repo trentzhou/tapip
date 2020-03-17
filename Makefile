@@ -8,6 +8,7 @@ CONFIG_DEBUG_ICMPEXCFRAGTIME = n
 CONFIG_TOPLOGY = 2
 #### End of User configure #########
 
+
 # Use 'make V=1' to see the full commands
 ifeq ("$(origin V)", "command line")
 	Q =
@@ -16,12 +17,31 @@ else
 endif
 export Q
 
+real_all: tapip
+	echo "Building..."
+
+CFLAGS=
+
+ifeq ($(CONFIG_DPDK), 1)
+	CFLAGS += -DCONFIG_DPDK
+	NET_STACK_OBJS += net/lib_dpdk.o
+
+ifeq ($(RTE_SDK),)
+	$(error "Please define RTE_SDK environment variable")
+endif
+
+	# Default target, detect a build directory, by looking for a path with a .config
+	RTE_TARGET := build
+	include $(RTE_SDK)/mk/rte.vars.mk
+	include $(RTE_SDK)/mk/rte.app.mk
+	LFLAGS += $(call linkerprefix, $(LDLIBS))
+endif
 MAKEFLAGS += --no-print-directory
 
 LD = ld
 CC = gcc
-CFLAGS = -Wall -I../include
-LFLAGS = -pthread 
+CFLAGS += -Wall -I../include -fPIC
+LFLAGS += -pthread 
 export LD CC CFLAGS
 CFLAGS += -g
 
@@ -55,7 +75,8 @@ else
 	CFLAGS += -DCONFIG_TOP2
 endif
 
-NET_STACK_OBJS =	shell/shell_obj.o	\
+
+NET_STACK_OBJS +=	shell/shell_obj.o	\
 			net/net_obj.o		\
 			arp/arp_obj.o		\
 			ip/ip_obj.o		\
@@ -65,7 +86,8 @@ NET_STACK_OBJS =	shell/shell_obj.o	\
 			app/app_obj.o		\
 			lib/lib_obj.o
 
-all:tapip
+
+
 tapip:$(NET_STACK_OBJS)
 	@echo " [BUILD] $@"
 	$(Q)$(CC) $(LFLAGS) $^ -o $@ -lreadline
@@ -101,8 +123,12 @@ tag:
 clean:
 	find . -name *.o | xargs rm -f
 	rm -f tapip cbuf
+	rm -f _pre* _post* _clean
 
 lines:
 	@echo "code lines:"
 	@wc -l `find . -name \*.[ch]` | sort -n
+
+net/lib_dpdk.o: net/dpdk/dpdk_netdev.c
+	$(Q)$(CC) $(CFLAGS) -Iinclude -c -o $@ $<
 
