@@ -224,6 +224,7 @@ int ethernet_tx_loop(void* arg)
         {
             // flush
             rte_eth_tx_buffer_flush(rw->worker_port_id, 0, rw->tx.tx_buffer);
+			usleep(50);
         }
 	}
 	return 0;
@@ -260,7 +261,7 @@ void ethernet_rw_init(struct ethernet_rw_t* rw)
 		rte_exit(EXIT_FAILURE, "Cannot init mbuf pool\n");
 
     // create the ring
-    rw->tx.tx_ring = rte_ring_create("tx_ring", 1000, rw->worker_socket_id, RING_F_SC_DEQ);
+    rw->tx.tx_ring = rte_ring_create("tx_ring", 512, rw->worker_socket_id, RING_F_SC_DEQ);
 
 	// get dev info
 	rte_eth_dev_info_get(rw->worker_port_id, &rw->dev_info);
@@ -430,7 +431,7 @@ static int dpdk_rx_thread(void* x)
 		uint16_t nb_rx = rte_eth_rx_burst(dpdk->worker_port_id, 0, pkts_burst, MAX_PKT_BURST);
 		if (nb_rx == 0)
 		{
-			usleep(10);
+			usleep(50);
 			continue;
 		}
 		
@@ -474,9 +475,11 @@ struct netdev* dpdk_dev_create(char* coremask, char* ipstr, int maskbits)
         "dpdk", "-c", coremask
     };
 
+	printf("Going to run rte_eal_init\n");
 	ret = rte_eal_init(argc, argv);
 	if (ret < 0)
 		rte_exit(EXIT_FAILURE, "Invalid EAL arguments\n");
+	printf("Finished rte_eal_init\n");
 
 	// check lcore mask
     int lcore_count = rte_lcore_count();
